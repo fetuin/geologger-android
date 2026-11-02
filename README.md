@@ -5,7 +5,7 @@
 Google Play 開発者サービスは使っていません。
 
 **[→ 配布ページ（使い方とダウンロード）](https://fetuin.github.io/geologger-android/)**
-・ [最新の APK](https://github.com/fetuin/geologger-android/releases/latest)
+・ [APK を直接ダウンロード](https://github.com/fetuin/geologger-android/raw/main/docs/GeoLogger-release.apk)
 
 Pebble ウォッチフェイス「GPS Trail」の送信部分を Android 単体で使えるように
 作り直したものです（ウォッチフェイスの時計表示はありません）。
@@ -161,6 +161,16 @@ Settings → Stored data から「30日より古い送信済みの点」をま�
   端末内の設定には平文で入ります
 - リリースビルドは難読化を切っています（縮小と最適化は有効）。不具合時に
   スタックトレースのクラス名がそのまま読めるようにするためです
+
+## 配布
+
+APK は `docs/GeoLogger-release.apk` に置き、GitHub Pages の配布ページから
+ダウンロードさせています（リポジトリの Settings → Pages で、ソースを
+`main` ブランチの `/docs` にすると公開されます）。
+
+更新するときは、ビルドした APK を同じ名前で `docs/` に上書きしてコミットしてください。
+配布ページのリンクは常に最新を指します。GitHub の Release を作った場合は、
+ページ側が自動でそちらを優先します。
 
 ## ライセンス
 

@@ -143,7 +143,7 @@
     歩いた場所を Android 端末に記録し、自分のサーバーへ送り、
     CSV / GPX / GeoJSON で書き出せる位置情報ロガーです。
   </p>
-  <a class="dl" id="download" href="https://github.com/fetuin/geologger-android/releases/latest/download/GeoLogger-release.apk">
+  <a class="dl" id="download" href="https://github.com/fetuin/geologger-android/raw/main/docs/GeoLogger-release.apk">
     APK をダウンロード
   </a>
   <p class="dl-sub">
@@ -293,8 +293,8 @@
       el.style.display = 'none';
     });
 
-  // ダウンロード先の見せ方。Release を作る前でもリンクが死なないよう、
-  // 最新リリースが無ければリポジトリ内の APK へ落とす。
+  // 既定ではリポジトリ内の APK を指す。あとで GitHub の Release を作った場合は
+  // そちらを自動で優先する（作っていなければ既定のまま）。
   var dl = document.getElementById('download');
   fetch('https://api.github.com/repos/fetuin/geologger-android/releases/latest')
     .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
