@@ -1,0 +1,17 @@
+# ビルド生成物
+build/
+.gradle/
+*.apk
+*.aab
+
+# 環境ごとの設定（SDK の場所など）
+local.properties
+
+# 署名鍵。公開リポジトリに置かないこと。
+# これが漏れると、第三者があなたのアプリを装った更新版に署名できてしまう。
+*.jks
+*.keystore
+keystore.properties
+
+.DS_Store
+*.log

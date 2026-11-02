@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- エクスポートの書き出し先。共有シートに渡すために公開する -->
+    <cache-path name="exports" path="exports/" />
+</paths>

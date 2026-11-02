@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GeoLogger — 位置情報を記録してサーバーへ送る Android アプリ</title>
+<meta name="description" content="歩いた場所を端末に記録し、自分のサーバーへ送り、CSV / GPX / GeoJSON で書き出せる Android アプリ。usePocket 製。">
+<meta property="og:title" content="GeoLogger — 位置情報ロガー">
+<meta property="og:description" content="歩いた場所を端末に記録し、自分のサーバーへ送り、CSV / GPX / GeoJSON で書き出せる Android アプリ。">
+<meta property="og:type" content="website">
+<link rel="icon" href="icon-512.png">
+<style>
+  :root {
+    --bg: #0e0f11;
+    --card: #171a1d;
+    --edge: #24282d;
+    --text: #e8eaed;
+    --dim: #9aa0a6;
+    --faint: #6b7177;
+    --accent: #1f6feb;
+    --good: #3fb950;
+    --trail: #2ea36f;
+    --warn: #d29922;
+    --max: 760px;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", "Segoe UI", Roboto, sans-serif;
+    font-size: 16px;
+    line-height: 1.75;
+  }
+  .wrap { max-width: var(--max); margin: 0 auto; padding: 0 20px 72px; }
+
+  header { text-align: center; padding: 56px 0 36px; }
+  header img { width: 112px; height: 112px; border-radius: 24px; display: block; margin: 0 auto 20px; }
+  h1 { font-size: 30px; margin: 0 0 10px; letter-spacing: .01em; }
+  .lead { color: var(--dim); margin: 0 auto; max-width: 30em; font-size: 15px; }
+
+  .dl {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--accent); color: #fff; text-decoration: none;
+    padding: 15px 30px; border-radius: 12px; font-weight: 700; font-size: 17px;
+    margin-top: 26px;
+  }
+  .dl:hover { background: #2a7cf7; }
+  .dl-sub { color: var(--faint); font-size: 13px; margin-top: 12px; }
+  .dl-sub a { color: var(--dim); }
+
+  h2 {
+    font-size: 20px; margin: 46px 0 14px;
+    padding-bottom: 10px; border-bottom: 1px solid var(--edge);
+  }
+  h3 { font-size: 16px; margin: 28px 0 8px; }
+  p { margin: 0 0 14px; }
+  a { color: #6cf; }
+
+  .card {
+    background: var(--card); border: 1px solid var(--edge);
+    border-radius: 12px; padding: 18px 20px; margin: 18px 0;
+  }
+  .card h3:first-child { margin-top: 0; }
+
+  .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+  .grid .card { margin: 0; }
+  .grid h3 { font-size: 15px; }
+  .grid p { color: var(--dim); font-size: 14px; margin: 0; }
+
+  ol.steps { counter-reset: s; list-style: none; padding: 0; margin: 0; }
+  ol.steps > li {
+    counter-increment: s; position: relative;
+    padding: 0 0 20px 46px; margin: 0;
+  }
+  ol.steps > li::before {
+    content: counter(s);
+    position: absolute; left: 0; top: 2px;
+    width: 30px; height: 30px; border-radius: 50%;
+    background: #1b2936; color: #9fd0ff;
+    display: grid; place-items: center;
+    font-size: 14px; font-weight: 700;
+  }
+  ol.steps > li::after {
+    content: ""; position: absolute; left: 15px; top: 36px; bottom: 2px;
+    width: 1px; background: var(--edge);
+  }
+  ol.steps > li:last-child::after { display: none; }
+  ol.steps strong { display: block; margin-bottom: 2px; }
+  ol.steps p { color: var(--dim); font-size: 14px; margin: 0; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 10px 0 4px; }
+  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--edge); vertical-align: top; }
+  th { color: var(--faint); font-weight: 600; white-space: nowrap; }
+  td code, p code, li code {
+    background: #000; color: #9c9; padding: 2px 6px;
+    border-radius: 5px; font-size: 13px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    word-break: break-all;
+  }
+  pre {
+    background: #000; border: 1px solid var(--edge); border-radius: 10px;
+    padding: 14px 16px; overflow-x: auto; font-size: 13px; line-height: 1.6;
+    color: #cfe;
+  }
+  pre code { background: none; padding: 0; color: inherit; }
+
+  .note {
+    border-left: 3px solid var(--warn); background: #201c12;
+    padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0;
+    font-size: 14px; color: #e8dcc0;
+  }
+  .note strong { color: #ffd98a; }
+
+  ul.plain { padding-left: 1.2em; color: var(--dim); font-size: 14px; }
+  ul.plain li { margin-bottom: 6px; }
+
+  footer {
+    border-top: 1px solid var(--edge); margin-top: 56px; padding-top: 24px;
+    color: var(--faint); font-size: 13px; text-align: center;
+  }
+  footer a { color: var(--dim); }
+  .counter {
+    margin-top: 18px; color: var(--faint); font-size: 13px;
+    font-variant-numeric: tabular-nums;
+  }
+  .counter b { color: var(--dim); font-weight: 600; }
+  @media (max-width: 520px) {
+    header { padding: 36px 0 24px; }
+    h1 { font-size: 24px; }
+    .wrap { padding: 0 16px 56px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <img src="icon-512.png" alt="GeoLogger のアイコン">
+  <h1>GeoLogger</h1>
+  <p class="lead">
+    歩いた場所を Android 端末に記録し、自分のサーバーへ送り、
+    CSV / GPX / GeoJSON で書き出せる位置情報ロガーです。
+  </p>
+  <a class="dl" id="download" href="https://github.com/fetuin/geologger-android/releases/latest/download/GeoLogger-release.apk">
+    APK をダウンロード
+  </a>
+  <p class="dl-sub">
+    バージョン 1.0 ・ 約 1.3 MB ・ Android 8.0 以上<br>
+    <a href="https://github.com/fetuin/geologger-android">ソースコードと更新履歴（GitHub）</a>
+  </p>
+</header>
+
+<h2>できること</h2>
+<div class="grid">
+  <div class="card">
+    <h3>端末に記録する</h3>
+    <p>画面を消していても記録が続きます。保存先は端末内のデータベースで、数十万点ためても平気です。</p>
+  </div>
+  <div class="card">
+    <h3>軌跡を見る</h3>
+    <p>記録した座標だけで線を描くので、地図データを読み込みません。圏外でも表示できます。</p>
+  </div>
+  <div class="card">
+    <h3>自分のサーバーへ送る</h3>
+    <p>記録した位置を自分で用意したサーバーへ送れます。圏外のぶんは溜めておき、つながったら送ります。</p>
+  </div>
+  <div class="card">
+    <h3>書き出す</h3>
+    <p>CSV・GPX・GeoJSON で取り出せます。共有メニューに渡すか、ダウンロードフォルダに保存します。</p>
+  </div>
+</div>
+
+<h2>入れかた</h2>
+<ol class="steps">
+  <li>
+    <strong>APK をダウンロードする</strong>
+    <p>上のボタンを押します。Android が「この種類のファイルは端末に危害を及ぼす可能性があります」と出しますが、そのまま続けて構いません。</p>
+  </li>
+  <li>
+    <strong>インストールを許可する</strong>
+    <p>ダウンロードした APK を開くと「提供元不明のアプリ」の確認が出ます。ブラウザやファイルアプリに対して許可してください。Google Play を経由しないアプリは、すべてこの確認が出ます。</p>
+  </li>
+  <li>
+    <strong>位置情報を「常に許可」にする</strong>
+    <p>アプリを開いて <b>Log → Start recording</b> を押すと権限を聞かれます。かならず「<b>常に許可</b>」を選んでください。「アプリの使用中のみ許可」では、画面を消した時点で記録が止まります。</p>
+  </li>
+  <li>
+    <strong>記録が始まる</strong>
+    <p>記録中は通知バーに常駐の通知が出ます。Android の決まりで、位置情報を裏で使うアプリはこの通知を消せません。通知の「Stop」からいつでも止められます。</p>
+  </li>
+</ol>
+
+<div class="note">
+  <strong>電池について。</strong>
+  既定では 1 分ごとに測位し、30 m 以上動いたときだけ記録します。止まっているあいだは何も記録せず通信もしないので、机に置いたままなら電池はほとんど減りません。間隔は <b>Settings → Recording</b> で変えられます。
+</div>
+
+<h2>画面の見かた</h2>
+<table>
+  <tr><th>Log</th><td>記録の開始と停止、ためた点の数、送信の状況、直近の測位の一覧。</td></tr>
+  <tr><th>Map</th><td>軌跡の表示。今日 / 7 日 / 全部で切り替えられます。線をタップするとその地点の時刻と座標が出ます。最後の区間だけ色が違うのは、進んでいる向きを示すためです。</td></tr>
+  <tr><th>Export</th><td>書き出し。形式と範囲（全部 / 今日 / 7 日 / 未送信のみ）を選びます。書き出してもアプリ内のデータは消えません。</td></tr>
+  <tr><th>Settings</th><td>送信先サーバー、送信のしかた、測位の間隔、たまったデータの削除。</td></tr>
+</table>
+
+<h2>サーバーへ送る設定</h2>
+<p>
+  サーバーへ送らず、端末内の記録と書き出しだけで使うこともできます。送る場合は
+  <b>Settings → Server account</b> に送信先の URL・ID・パスワードを入れてください。入れるまで、記録した点は送られずに端末へたまり続けます。
+</p>
+
+<h3>送信のしかた</h3>
+<table>
+  <tr><th>Send every fix</th><td>記録するたびに 1 件ずつ送ります。サーバーに残る時刻が実際の測位時刻に近くなります。</td></tr>
+  <tr><th>Send in batches</th><td>決めた数（5〜50）たまってからまとめて送ります。通信の回数が減るぶん電池に優しいです。</td></tr>
+</table>
+<p style="color:var(--dim);font-size:14px">
+  まとめて送る設定では、たまりきらないぶんは次に動くまで端末に残ります。すぐ送りたいときは Log タブの「Upload now」を押してください。
+</p>
+
+<h3>サーバー側の受け口</h3>
+<p>自分でサーバーを用意する場合、アプリは次の形で送ります。</p>
+<pre><code>POST application/x-www-form-urlencoded
+
+1件   mode=add&amp;id=..&amp;pw=..&amp;lat=35.680000&amp;lon=139.761600[&amp;c=A1B][&amp;t=1791357596]
+まとめて mode=add&amp;id=..&amp;pw=..&amp;d=35.680000,139.761600,A1B[,1791357596]&amp;d=...</code></pre>
+<ul class="plain">
+  <li><code>t</code> は測位した時刻（UNIX 秒）です。サーバーが対応してから <b>Settings → Sending → Send timestamps</b> で有効にしてください。未対応のまま有効にすると、すべての送信が失敗します。</li>
+  <li>応答が 2xx なら送信済みとして扱います。4xx は「直さないかぎり直らない」と判断して自動送信を止めます（設定を直すか「Upload now」で再開）。5xx や通信エラーは次の機会に自動で送り直します。</li>
+  <li>URL は <code>https://</code> で指定してください。<code>http://</code> だとリダイレクトで送信内容が失われることがあります。</li>
+</ul>
+
+<h2>書き出せる形式</h2>
+<table>
+  <tr><th>CSV</th><td>全項目。表計算ソフトで開けます。<br><code>id,timestamp,datetime_iso,latitude,longitude,accuracy_m,altitude_m,speed_mps,uploaded</code></td></tr>
+  <tr><th>GPX</th><td>GPS 機器や地図ソフトの標準形式。1 点ごとに時刻を持ちます。軌跡を線として見たいときはこちら。</td></tr>
+  <tr><th>GeoJSON</th><td>1 回の測位を 1 つの地点として並べます。地図ライブラリや GIS で読むとき向け。</td></tr>
+</table>
+
+<h2>うまく動かないとき</h2>
+<div class="card">
+  <h3>画面を消すと記録が止まる</h3>
+  <p style="color:var(--dim);font-size:14px;margin:0">
+    位置情報の権限が「常に許可」になっているか確認してください。Android の設定 → アプリ → GeoLogger → 権限 → 位置情報 から変えられます。
+  </p>
+  <h3>しばらくすると勝手に止まる</h3>
+  <p style="color:var(--dim);font-size:14px;margin:0">
+    一部のメーカー（Xiaomi、Huawei など）の省電力機能が、裏で動くアプリを止めることがあります。<b>Settings</b> の一番下にある「Exclude from battery optimisation」から、電池最適化の対象外にしてください。
+  </p>
+  <h3>送信に失敗する</h3>
+  <p style="color:var(--dim);font-size:14px;margin:0">
+    Log タブの Upload 欄に理由が出ます。<code>HTTP 400</code> なら ID かパスワードの間違い、または <code>t</code> に未対応のサーバーで Send timestamps を有効にしている場合です。記録した点は消えないので、設定を直して「Upload now」を押せば送られます。
+  </p>
+</div>
+
+<h2>技術的なこと</h2>
+<ul class="plain">
+  <li>Kotlin + Jetpack Compose で書いた素の Android アプリです。Google Play 開発者サービスを使わないので、GMS の入っていない端末でも動きます。</li>
+  <li>対応は Android 8.0 以上（minSdk 26 / targetSdk 36）。</li>
+  <li>記録した位置が外に出るのは、自分で設定した送信先だけです。ほかのどこにも送っていません。広告も解析も入っていません。</li>
+  <li>ソースは <a href="https://github.com/fetuin/geologger-android">GitHub</a> にあります。</li>
+</ul>
+
+<footer>
+  <p>
+    作: <a href="https://usepocket.com">usePocket</a> ・
+    <a href="https://github.com/fetuin/geologger-android">GitHub</a>
+  </p>
+  <p class="counter" id="counter">アクセス数を読み込み中…</p>
+</footer>
+
+</div>
+
+<script>
+(function () {
+  // アクセスカウンターは自前の CGI。IP ごとに重複を除いてくれるので、
+  // 読み込みのたびに1回呼ぶだけでよい。
+  var el = document.getElementById('counter');
+  var url = 'https://usepocket.com/api/counter.cgi?page=geologger-android';
+
+  fetch(url, { cache: 'no-store' })
+    .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
+    .then(function (d) {
+      if (!d || typeof d.total !== 'number') throw new Error('bad payload');
+      var n = function (v) { return (v || 0).toLocaleString('ja-JP'); };
+      el.innerHTML = 'アクセス数 <b>' + n(d.total) + '</b>' +
+                     '（今日 <b>' + n(d.today) + '</b> ／ 昨日 <b>' + n(d.yesterday) + '</b>）';
+    })
+    .catch(function () {
+      // カウンターが落ちていてもページの邪魔をしない
+      el.style.display = 'none';
+    });
+
+  // ダウンロード先の見せ方。Release を作る前でもリンクが死なないよう、
+  // 最新リリースが無ければリポジトリ内の APK へ落とす。
+  var dl = document.getElementById('download');
+  fetch('https://api.github.com/repos/fetuin/geologger-android/releases/latest')
+    .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
+    .then(function (rel) {
+      var apk = (rel.assets || []).filter(function (a) { return /\.apk$/i.test(a.name); })[0];
+      if (apk) {
+        dl.href = apk.browser_download_url;
+        var sub = document.querySelector('.dl-sub');
+        var mb = (apk.size / 1048576).toFixed(1);
+        sub.innerHTML = 'バージョン ' + (rel.tag_name || '1.0').replace(/^v/, '') +
+          ' ・ 約 ' + mb + ' MB ・ Android 8.0 以上<br>' +
+          '<a href="https://github.com/fetuin/geologger-android">ソースコードと更新履歴（GitHub）</a>';
+      }
+    })
+    .catch(function () { /* 既定のリンクのままでよい */ });
+})();
+</script>
+</body>
+</html>

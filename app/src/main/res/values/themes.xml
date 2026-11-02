@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Compose 側で配色を決めるので、ここは起動時のちらつきを抑えるためだけの指定 -->
+    <style name="Theme.GeoLogger" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">#0E0F11</item>
+        <item name="android:statusBarColor">#0E0F11</item>
+        <item name="android:navigationBarColor">#121417</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>
