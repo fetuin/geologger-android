@@ -4,8 +4,7 @@
 書き出せる位置情報ロガー。Kotlin + Jetpack Compose の素の Android アプリで、
 Google Play 開発者サービスは使っていません。
 
-**[→ 配布ページ（使い方とダウンロード）](https://fetuin.github.io/geologger-android/)**
-・ [APK を直接ダウンロード](https://github.com/fetuin/geologger-android/raw/main/docs/GeoLogger-release.apk)
+**[→ 配布ページ（使い方とダウンロード）](https://fetuin.moo.jp/geologger-apk/)**
 
 Pebble ウォッチフェイス「GPS Trail」の送信部分を Android 単体で使えるように
 作り直したものです（ウォッチフェイスの時計表示はありません）。
@@ -63,9 +62,11 @@ targetSdk 36 のアプリは Android 17 端末でもそのまま動きます。
 
 `tools/make_icons.py` で各密度の前景 PNG と配布ページ用の見本を生成します。
 アダプティブアイコンの前景に文字（usepocket）を入れたいので、ベクターではなく PNG です。
+`tools/make_ogimage.py` は配布ページの OG 画像（`docs/og.jpg`）を作ります。
 
 ```bash
 python3 tools/make_icons.py
+python3 tools/make_ogimage.py
 ```
 
 ## サーバーとのやりとり
@@ -142,7 +143,7 @@ app/src/main/java/com/usepocket/geologger/
   export/Exporter.kt         書き出し・共有・ダウンロード保存
   ui/                        Compose の画面（Log / Map / Export / Settings）
 app/src/test/                単体テスト 18 件
-docs/                        配布ページ（GitHub Pages）
+docs/                        配布ページ一式（そのままサーバーへ上げる）
 tools/make_icons.py          アイコン生成
 ```
 
@@ -164,13 +165,32 @@ Settings → Stored data から「30日より古い送信済みの点」をま�
 
 ## 配布
 
-APK は `docs/GeoLogger-release.apk` に置き、GitHub Pages の配布ページから
-ダウンロードさせています（リポジトリの Settings → Pages で、ソースを
-`main` ブランチの `/docs` にすると公開されます）。
+配布ページと APK は **https://fetuin.moo.jp/geologger-apk/** に置いています。
+`docs/` の中身がそのまま設置用の一式です。
 
-更新するときは、ビルドした APK を同じ名前で `docs/` に上書きしてコミットしてください。
-配布ページのリンクは常に最新を指します。GitHub の Release を作った場合は、
-ページ側が自動でそちらを優先します。
+```
+docs/
+  index.html              配布ページ（使い方・アクセスカウンター付き）
+  GeoLogger-release.apk   配布する APK
+  og.jpg                  OG 画像（1200x630 / JPEG）
+  icon-512.png            アイコン
+```
+
+更新するときの手順:
+
+1. `./gradlew assembleRelease` でビルド
+2. 出てきた APK を `docs/GeoLogger-release.apk` に同じ名前で上書き
+3. 版を変えたなら `docs/index.html` のバージョン表記とサイズを直す
+4. コミットして、`docs/` の中身をサーバーの `geologger-apk/` へ上げる
+
+ページ内のリンクはすべて相対なので、フォルダごと別の場所へ移しても動きます。
+ただし OG 画像の URL は絶対パスで書く必要があるため、設置先を変えるときは
+`index.html` の `og:image` / `og:url` / `canonical` を直してください。
+
+アクセスカウンターは自作の CGI（`https://usepocket.com/api/counter.cgi`）を
+`?page=geologger-android` で呼んでいます。IP ごとに重複を除く作りなので、
+読み込みのたびに1回呼ぶだけでよく、リロードで増えません。
+カウンターが落ちている場合は表示を隠すだけで、ページの邪魔はしません。
 
 ## ライセンス
 

@@ -5,10 +5,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>GeoLogger — 位置情報を記録してサーバーへ送る Android アプリ</title>
 <meta name="description" content="歩いた場所を端末に記録し、自分のサーバーへ送り、CSV / GPX / GeoJSON で書き出せる Android アプリ。usePocket 製。">
-<meta property="og:title" content="GeoLogger — 位置情報ロガー">
-<meta property="og:description" content="歩いた場所を端末に記録し、自分のサーバーへ送り、CSV / GPX / GeoJSON で書き出せる Android アプリ。">
+<link rel="canonical" href="https://fetuin.moo.jp/geologger-apk/">
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="usePocket">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:url" content="https://fetuin.moo.jp/geologger-apk/">
+<meta property="og:title" content="GeoLogger — 位置情報ロガー（Android）">
+<meta property="og:description" content="歩いた場所を端末に記録し、地図に描き、自分のサーバーへ送り、CSV / GPX / GeoJSON で書き出せる Android アプリ。広告なし。">
+<!-- OG 画像は絶対URLでないと拾われない。透過を持たない JPEG のほうが各サービスで扱いが安定する -->
+<meta property="og:image" content="https://fetuin.moo.jp/geologger-apk/og.jpg">
+<meta property="og:image:secure_url" content="https://fetuin.moo.jp/geologger-apk/og.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="GeoLogger — 歩いた場所を記録して自分のサーバーへ送る Android アプリ">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="GeoLogger — 位置情報ロガー（Android）">
+<meta name="twitter:description" content="歩いた場所を端末に記録し、地図に描き、自分のサーバーへ送り、CSV / GPX / GeoJSON で書き出せる Android アプリ。">
+<meta name="twitter:image" content="https://fetuin.moo.jp/geologger-apk/og.jpg">
 <link rel="icon" href="icon-512.png">
+<link rel="apple-touch-icon" href="icon-512.png">
 <style>
   :root {
     --bg: #0e0f11;
@@ -143,7 +159,7 @@
     歩いた場所を Android 端末に記録し、自分のサーバーへ送り、
     CSV / GPX / GeoJSON で書き出せる位置情報ロガーです。
   </p>
-  <a class="dl" id="download" href="https://github.com/fetuin/geologger-android/raw/main/docs/GeoLogger-release.apk">
+  <a class="dl" id="download" href="GeoLogger-release.apk" download>
     APK をダウンロード
   </a>
   <p class="dl-sub">
@@ -293,23 +309,6 @@
       el.style.display = 'none';
     });
 
-  // 既定ではリポジトリ内の APK を指す。あとで GitHub の Release を作った場合は
-  // そちらを自動で優先する（作っていなければ既定のまま）。
-  var dl = document.getElementById('download');
-  fetch('https://api.github.com/repos/fetuin/geologger-android/releases/latest')
-    .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
-    .then(function (rel) {
-      var apk = (rel.assets || []).filter(function (a) { return /\.apk$/i.test(a.name); })[0];
-      if (apk) {
-        dl.href = apk.browser_download_url;
-        var sub = document.querySelector('.dl-sub');
-        var mb = (apk.size / 1048576).toFixed(1);
-        sub.innerHTML = 'バージョン ' + (rel.tag_name || '1.0').replace(/^v/, '') +
-          ' ・ 約 ' + mb + ' MB ・ Android 8.0 以上<br>' +
-          '<a href="https://github.com/fetuin/geologger-android">ソースコードと更新履歴（GitHub）</a>';
-      }
-    })
-    .catch(function () { /* 既定のリンクのままでよい */ });
 })();
 </script>
 </body>
