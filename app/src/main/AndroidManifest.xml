@@ -10,6 +10,8 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <!-- 記録中の常駐通知を出すため（Android 13 以降） -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- 端末を再起動したあとに記録を自動で再開するため -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <!-- Android 9 以下で「ダウンロード」へ直接保存するときだけ必要。
          API 29 以降は MediaStore 経由なので要らない -->
     <uses-permission
@@ -47,6 +49,23 @@
             android:name=".service.LocationService"
             android:exported="false"
             android:foregroundServiceType="location" />
+
+        <!-- 再起動・アプリ更新のあとに記録を再開する。
+             システムからのブロードキャストを受けるので exported="true" が要る。
+             受け取る intent は下の filter のものだけ。 -->
+        <receiver
+            android:name=".service.BootReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:directBootAware="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <!-- 一部メーカーの端末は独自の起動完了通知を投げる -->
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+        </receiver>
 
         <!-- エクスポートしたファイルを他アプリへ渡すため -->
         <provider

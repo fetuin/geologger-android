@@ -50,13 +50,40 @@ class LocationService : Service(), LocationListener {
         /** 画面側が記録件数の変化を知るためのブロードキャスト */
         const val BROADCAST_POINT = "com.usepocket.geologger.POINT_RECORDED"
 
-        fun start(context: Context) {
+        /**
+         * サービスが今このプロセスで動いているか。
+         * プロセスごと落とされると false に戻るので、「設定では記録中なのに
+         * 実際は動いていない」状態を画面側で見分けられる。
+         */
+        @Volatile
+        var isRunning: Boolean = false
+            private set
+
+        /**
+         * 記録を始める。
+         * Android 12 以降は背景から前景サービスを開始できない場面があり、
+         * そこでは例外が飛ぶ。落とさずに false を返して、呼び出し側に任せる。
+         */
+        fun start(context: Context): Boolean {
             val i = Intent(context, LocationService::class.java).setAction(ACTION_START)
-            ContextCompat.startForegroundService(context, i)
+            return try {
+                ContextCompat.startForegroundService(context, i)
+                true
+            } catch (e: Exception) {
+                Log.w(TAG, "前景サービスを開始できなかった", e)
+                PointDb.get(context).setMeta("lastTrackError", e.message ?: e.toString())
+                false
+            }
         }
 
         fun stop(context: Context) {
-            context.startService(Intent(context, LocationService::class.java).setAction(ACTION_STOP))
+            try {
+                context.startService(
+                    Intent(context, LocationService::class.java).setAction(ACTION_STOP)
+                )
+            } catch (e: Exception) {
+                Log.w(TAG, "停止の指示を送れなかった", e)
+            }
         }
 
         fun reconfigure(context: Context) {
@@ -77,6 +104,7 @@ class LocationService : Service(), LocationListener {
 
     override fun onCreate() {
         super.onCreate()
+        isRunning = true
         lm = getSystemService(Context.LOCATION_SERVICE) as LocationManager
         createChannel()
     }
@@ -106,6 +134,7 @@ class LocationService : Service(), LocationListener {
     }
 
     override fun onDestroy() {
+        isRunning = false
         stopListening()
         worker.shutdown()
         super.onDestroy()

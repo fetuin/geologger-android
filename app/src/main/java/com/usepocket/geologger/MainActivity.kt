@@ -130,6 +130,14 @@ class MainActivity : ComponentActivity() {
             requestNotifications.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
 
+        // 設定では記録中なのにサービスが居なければ立て直す。
+        // 端末の再起動では BootReceiver が拾うが、そこで権限が足りなかった場合や、
+        // メーカー独自の省電力機能に殺された場合の取りこぼしをここで拾う。
+        // アプリが前面にある状態なので、前景サービスを開始してよい。
+        if (Prefs.isTracking(this) && !LocationService.isRunning) {
+            LocationService.start(this)
+        }
+
         // 起動時に、溜まっていれば送信を試みる
         lifecycleScope.launch(Dispatchers.IO) {
             runCatching { Uploader.flush(this@MainActivity, manual = false) }
@@ -169,6 +177,9 @@ class MainActivity : ComponentActivity() {
         var points by remember { mutableStateOf(emptyList<Point>()) }
         var settings by remember { mutableStateOf(Prefs.load(this)) }
         var tracking by remember { mutableStateOf(Prefs.isTracking(this)) }
+        // 「設定では記録中」と「実際に動いている」を分けて持つ。
+        // 食い違っていたら画面で知らせる（黙って止まっているのがいちばん困る）
+        var serviceAlive by remember { mutableStateOf(LocationService.isRunning) }
         var busy by remember { mutableStateOf<String?>(null) }
 
         // 地図
@@ -198,6 +209,7 @@ class MainActivity : ComponentActivity() {
                 stats = st; status = us; points = pts; counts = cnt
                 settings = Prefs.load(this@MainActivity)
                 tracking = Prefs.isTracking(this@MainActivity)
+                serviceAlive = LocationService.isRunning
             }
         }
 
@@ -319,7 +331,8 @@ class MainActivity : ComponentActivity() {
                 when (tab) {
                     "log" -> LogScreen(
                         stats = stats, status = status, points = points,
-                        tracking = tracking, settings = settings, busy = busy,
+                        tracking = tracking, serviceAlive = serviceAlive,
+                        settings = settings, busy = busy,
                         onToggleTracking = {
                             lifecycleScope.launch {
                                 busy = "track"

@@ -125,8 +125,23 @@ Google Play 開発者サービスは使わず、プラットフォームの `Loc
 - それ未満は `GPS_PROVIDER` と `NETWORK_PROVIDER` の両方を受ける
   （High accuracy を on にすると GPS のみ）
 
-記録は前景サービス（`foregroundServiceType="location"`）で行い、`START_STICKY` なので
-OS に止められても復帰します。
+記録は前景サービス（`foregroundServiceType="location"`）で行います。止まったあとの
+立て直しは三段構えです。
+
+| 止まり方 | 戻し方 |
+|---|---|
+| OS がサービスだけを落とした | `START_STICKY` でそのまま再生成される |
+| 端末を再起動した | `BootReceiver` が `BOOT_COMPLETED` を受けて開始し直す |
+| アプリを更新した | 同じく `MY_PACKAGE_REPLACED` で開始し直す |
+| それでも落ちていた | アプリを開いたときに検知して開始し直す |
+
+`START_STICKY` だけでは端末の再起動に対応できません（プロセスごと消え、誰も
+開始し直さないため）。再開するのは「直前まで記録していた」ときだけで、自分で
+止めていた場合は再起動しても始まりません。
+
+再起動時に位置情報の権限が「常に許可」でなくなっていると再開できないので、
+理由を記録して Log タブに出します。設定上は記録中なのにサービスが動いていない
+場合も、Log タブの先頭が赤くなって分かるようにしてあります。
 
 ## ファイル構成
 
@@ -139,6 +154,7 @@ app/src/main/java/com/usepocket/geologger/
   data/PointDb.kt            SQLite（SQLiteOpenHelper）
   data/Prefs.kt              設定（SharedPreferences）
   service/LocationService.kt 前景サービスと測位の取り込み
+  service/BootReceiver.kt    再起動・アプリ更新のあとに記録を再開する
   export/Formats.kt          CSV / GPX / GeoJSON の整形    ← 単体テスト対象
   export/Exporter.kt         書き出し・共有・ダウンロード保存
   ui/                        Compose の画面（Log / Map / Export / Settings）

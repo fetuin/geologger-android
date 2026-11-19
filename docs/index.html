@@ -163,7 +163,7 @@
     APK をダウンロード
   </a>
   <p class="dl-sub">
-    バージョン 1.0 ・ 約 1.3 MB ・ Android 8.0 以上<br>
+    バージョン 1.1 ・ 約 1.3 MB ・ Android 8.0 以上<br>
     <a href="https://github.com/fetuin/geologger-android">ソースコードと更新履歴（GitHub）</a>
   </p>
 </header>
@@ -204,7 +204,7 @@
   </li>
   <li>
     <strong>記録が始まる</strong>
-    <p>記録中は通知バーに常駐の通知が出ます。Android の決まりで、位置情報を裏で使うアプリはこの通知を消せません。通知の「Stop」からいつでも止められます。</p>
+    <p>記録中は通知バーに常駐の通知が出ます。Android の決まりで、位置情報を裏で使うアプリはこの通知を消せません。通知の「Stop」からいつでも止められます。<b>端末を再起動しても記録は自動で再開します</b>（自分で止めていた場合は再開しません）。</p>
   </li>
 </ol>
 
@@ -261,9 +261,13 @@
   <p style="color:var(--dim);font-size:14px;margin:0">
     位置情報の権限が「常に許可」になっているか確認してください。Android の設定 → アプリ → GeoLogger → 権限 → 位置情報 から変えられます。
   </p>
+  <h3>端末を再起動したら記録が止まった</h3>
+  <p style="color:var(--dim);font-size:14px;margin:0">
+    バージョン 1.1 から自動で再開します。それでも止まる場合は、位置情報の権限が「常に許可」になっているか確認してください。再起動後に権限が足りないと再開できません。アプリを開くと、その場で記録し直します。
+  </p>
   <h3>しばらくすると勝手に止まる</h3>
   <p style="color:var(--dim);font-size:14px;margin:0">
-    一部のメーカー（Xiaomi、Huawei など）の省電力機能が、裏で動くアプリを止めることがあります。<b>Settings</b> の一番下にある「Exclude from battery optimisation」から、電池最適化の対象外にしてください。
+    一部のメーカー（Xiaomi、Huawei など）の省電力機能が、裏で動くアプリを止めることがあります。<b>Settings</b> の一番下にある「Exclude from battery optimisation」から、電池最適化の対象外にしてください。止められていた場合は Log タブの上部が赤くなり「Recording stopped」と出ます。
   </p>
   <h3>送信に失敗する</h3>
   <p style="color:var(--dim);font-size:14px;margin:0">

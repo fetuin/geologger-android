@@ -49,6 +49,8 @@ fun LogScreen(
     status: UploadStatus,
     points: List<Point>,
     tracking: Boolean,
+    /** 設定上の「記録中」ではなく、サービスが実際に動いているか */
+    serviceAlive: Boolean,
     settings: Settings,
     busy: String?,
     onToggleTracking: () -> Unit,
@@ -59,18 +61,25 @@ fun LogScreen(
 
     LazyColumn(Modifier.fillMaxWidth(), contentPadding = androidx.compose.foundation.layout.PaddingValues(14.dp)) {
         item {
+            // 「記録中のはずなのに動いていない」を黙って見逃さない
+            val stalled = tracking && !serviceAlive
             Card(
-                fill = if (tracking) Hue.goodBg else Hue.card,
-                edge = if (tracking) Hue.goodEdge else Hue.cardEdge
+                fill = if (stalled) Hue.badBg else if (tracking) Hue.goodBg else Hue.card,
+                edge = if (stalled) Hue.badEdge else if (tracking) Hue.goodEdge else Hue.cardEdge
             ) {
                 Text(
-                    if (tracking) "Recording" else "Not recording",
+                    if (stalled) "Recording stopped" else if (tracking) "Recording" else "Not recording",
                     color = Hue.text, fontSize = 17.sp, fontWeight = FontWeight.Bold
                 )
                 Note(
-                    if (tracking)
+                    if (stalled)
+                        "The recorder is switched on but is not running. Android most likely stopped " +
+                            "it. Tap Stop and then Start recording again, and exclude the app from " +
+                            "battery optimisation in Settings."
+                    else if (tracking)
                         "A fix is taken at most every ${settings.intervalSec} s, and stored only " +
-                            "when you have moved ${settings.minMoveM} m or more."
+                            "when you have moved ${settings.minMoveM} m or more. Recording resumes " +
+                            "by itself after the phone restarts."
                     else
                         "Start recording to log your location in the background."
                 )
